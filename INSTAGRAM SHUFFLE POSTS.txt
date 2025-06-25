@@ -1,0 +1,104 @@
+// INSTAGRAM SHUFFLE POSTS 
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // swap elements
+  }
+  return array;
+}
+
+
+// INSTAGRAM POSTS
+
+function createScheduledInstagramPosts() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("IG Posts");
+  if (!sheet) {
+    Logger.log("❌ 'IG Posts' sheet not found.");
+    return;
+  }
+
+  const now = new Date();
+  const timezone = Session.getScriptTimeZone();
+  const formattedDate = Utilities.formatDate(now, timezone, "MM/dd/yyyy HH:mm:ss");
+
+
+  const messages = [
+    "🎯 Enroll today and save 20%! Start your real estate career now.",
+    "📘 Florida requires DBPR-approved courses — we've got you covered.",
+    "👩‍🎓 'I passed on my first try thanks to RECOF!'",
+    "📣 Broker Pre-License course is now open — take your license further!",
+    "💡 Knock out your CE 100% online — simple, fast, DBPR-approved.",
+    "💥 Weekend promo! Save 20% at checkout.",
+    "💭 'Start where you are. Use what you have. Do what you can.'",
+    "🌴 Learn from anywhere — beach, home, or on the go!",
+    "🏡 Dreaming of a real estate career? Start now with RECOF.",
+    "⏳ Don’t miss deadlines — your license renewal starts here.",
+    "📚 Invest in yourself. Take the course that pays you back.",
+    "✅ Fast-track your licensing with our 63-hour pre-license course.",
+    "🚀 Get licensed from home. Self-paced & affordable.",
+    "👩‍💼 Upgrade to broker status with our online courses.",
+    "🗓️ Enroll today, study anytime. You’re in control.",
+    "📈 Real estate is growing — position yourself now.",
+    "💪 Women in real estate: build your legacy with RECOF.",
+    "🔑 Your real estate future starts with one step. Enroll now.",
+    "📲 No apps, no clutter — everything is online & mobile-friendly.",
+    "🌟 Join 5,000+ students who’ve chosen RECOF to start their journey."
+  ];
+
+  const shuffledMessages = shuffleArray([...messages]);
+
+  const media = [
+    "https://i.imgur.com/eYGfB2A.png", "https://i.imgur.com/18MA3Ur.png",
+    "https://i.imgur.com/XQrR6Mf.png", "https://i.imgur.com/NbrXNwf.png",
+    "https://i.imgur.com/Y0kgOZn.png", "https://i.imgur.com/9R0I3K0.png",
+    "https://i.imgur.com/GwHLiK5.png", "https://i.imgur.com/a0XafrJ.png",
+    "https://i.imgur.com/gTSQFRq.png", "https://i.imgur.com/mUTnndw.png",
+    "https://i.imgur.com/5RY8BcA.png", "https://i.imgur.com/Ir2nzxk.png",
+    "https://i.imgur.com/dxVEYaH.png", "https://i.imgur.com/P2PLQ6a.png",
+    "https://i.imgur.com/yMFjuIC.png", "https://i.imgur.com/JAUaRyK.png"
+  ];
+
+  const hashtags = "#realestate #floridarealestate #realestatelife #dbpr #onlinecourse #realestateagent #realtorsofinstagram #realtorlife #realestateeducation #floridalicense #studygram #womeninrealestate #realestatecoach #realtorgoals #realestateinvesting #brokercourse #realestateclass #getlicensed #RECOF";
+
+
+  // Load previously used images
+  const props = PropertiesService.getScriptProperties();
+  const usedImages = JSON.parse(props.getProperty("usedInstagramImages") || "[]");
+
+  // Filter out already used images
+  // Filter out already used images and shuffle
+  let availableMedia = shuffleArray(media.filter(img => !usedImages.includes(img)));
+
+
+  // If all have been used, reset
+  if (availableMedia.length < 2) {
+  availableMedia = shuffleArray([...media]);
+  props.setProperty("usedInstagramImages", JSON.stringify([]));
+}
+
+
+  const times = ["Morning", "Afternoon"];
+  times.forEach((timeLabel) => {
+    const selectedMessage = shuffledMessages.pop();
+
+    const selectedMedia = availableMedia.splice(Math.floor(Math.random() * availableMedia.length), 1)[0]; // Pick & remove
+
+    const fullMessage = `${selectedMessage} https://www.myrealestatecampus.com\n\n${hashtags}`;
+    sheet.appendRow([
+      formattedDate,
+      fullMessage,
+      selectedMedia,
+      "",         // Instagram Post ID (optional)
+      "Ready",    // Status
+      "Yes",      // Auto-post flag
+      timeLabel   // Time of day
+    ]);
+
+    Logger.log(`✅ Instagram ${timeLabel} post logged: ${fullMessage}`);
+    usedImages.push(selectedMedia);
+  });
+
+  // Save updated used image list
+  props.setProperty("usedInstagramImages", JSON.stringify(usedImages));
+}
